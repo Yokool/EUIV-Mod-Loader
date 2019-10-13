@@ -2,6 +2,7 @@ package com.Gamer;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.util.ArrayList;
 
@@ -129,26 +130,29 @@ public class FileLoader {
 	private void ReadFile(File file) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(file));
-			
+			StringBuffer inputBuffer = new StringBuffer();
 			String line;
 			
-			line = reader.readLine();
-			
-			while(line != null) {
-				
-				System.out.println(line);
+			while ( (line = reader.readLine() ) != null) {
 				
 				if(line.regionMatches(true, 0, "archive", 0, 7)) {
 					
-					String[] lineSplit = line.split("=");
-					String[] pathSplit = lineSplit[1].split("\"");
-					String path = pathSplit[1];
-					path.replaceAll(".*", file.getName());
+					String path = file.getName();
+					line = "archive=" + "\"" + path + "\"";
+					
 					
 					
 				}
-				line = reader.readLine();
+				
+				inputBuffer.append(line);
+				inputBuffer.append("\n");
 			}
+			
+			String finalPath = file.getPath();
+			
+			FileOutputStream output = new FileOutputStream(finalPath);
+			output.write(inputBuffer.toString().getBytes());
+			output.close();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
