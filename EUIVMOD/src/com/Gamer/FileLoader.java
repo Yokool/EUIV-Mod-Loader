@@ -18,6 +18,8 @@ public class FileLoader {
 	
 	private ArrayList<File> Descriptors = new ArrayList<File>();
 	
+	private ArrayList<File> MovedDescriptors = new ArrayList<File>();
+	
 	// Contructor, Param used to init the path to Documents
 	public FileLoader(File pathToModFolder) {
 		
@@ -31,6 +33,7 @@ public class FileLoader {
 	// A method to:
 	// - load a list of all files in the pathToModFolder
 	// - store all the file names as strings and display them
+	// - output how many folders were found
 	// ! to avoid confusion AllMods refers to all folders in the directory pathToModFolder !
 	private void LoadAllMods() {
 		
@@ -52,6 +55,7 @@ public class FileLoader {
 	// A method which:
 	// - looks for all descriptor.mod files in AllMods array
 	// - stores said file in Descriptors array list
+	// - output how many descriptors were found out of the number of all the mods/folders
 	private void FindDescriptors() {
 		
 		for(File mod : AllMods) {
@@ -90,9 +94,23 @@ public class FileLoader {
 		
 	}
 	
-	// helper function to move a single file to pathToModFolder path
+	// helper function to:
+	// - Move a single file to pathToModFolder path
+	// - Rename the moved file to the name of the file the descriptor was located in (most of the time this will be the name of the mod)
+	// - Add the moved file to the MovedDescriptors array list if the moving succeeds
+	// - Output a message to the console if the moving fails
 	private void MoveFile(File file) {
-		file.renameTo(new File(pathToModFolder.getPath() + "\\descriptor.mod") );
+		String newName = file.getParentFile().getName();
+		File movedDescriptor = new File(pathToModFolder.getPath() + "\\" + newName + ".mod");
+		
+		if(file.renameTo(movedDescriptor)) {
+			MovedDescriptors.add(movedDescriptor);
+		}else {
+			System.out.println("Failed to move " + file);
+		}
+		
+		
+		
 	}
 	
 }
