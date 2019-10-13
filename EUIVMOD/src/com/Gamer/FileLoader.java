@@ -24,17 +24,21 @@ public class FileLoader {
 		this.pathToModFolder = pathToModFolder;
 		LoadAllMods();
 		FindDescriptors();
+		MoveDescriptors();
 	}
 	
 	
-	// A method to load all mods
+	// A method to:
+	// - load a list of all files in the pathToModFolder
+	// - store all the file names as strings and display them
+	// ! to avoid confusion AllMods refers to all folders in the directory pathToModFolder !
 	private void LoadAllMods() {
 		
 		AllMods = this.pathToModFolder.listFiles();
 		
 		ModNames = new String[AllMods.length];
 		
-		System.out.println("Found " + AllMods.length + " mods.");
+		System.out.println("Found " + AllMods.length + " folders.");
 		
 		for(int i = 0; i < AllMods.length; i++) {
 			
@@ -45,6 +49,9 @@ public class FileLoader {
 		
 	}
 	
+	// A method which:
+	// - looks for all descriptor.mod files in AllMods array
+	// - stores said file in Descriptors array list
 	private void FindDescriptors() {
 		
 		for(File mod : AllMods) {
@@ -69,6 +76,23 @@ public class FileLoader {
 		
 		System.out.println("Found " + Descriptors.size() + " descriptors out of " + AllMods.length + " mods.");
 		
+	}
+	
+	// Moves all descriptors from their directory to pathToModFolder directory
+	private void MoveDescriptors(){
+		
+		for(File descriptor : Descriptors) {
+			
+			MoveFile(descriptor);
+			
+		}
+		
+		
+	}
+	
+	// helper function to move a single file to pathToModFolder path
+	private void MoveFile(File file) {
+		file.renameTo(new File(pathToModFolder.getPath() + "\\descriptor.mod") );
 	}
 	
 }
