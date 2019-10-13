@@ -1,6 +1,8 @@
 package com.Gamer;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 
 public class FileLoader {
@@ -27,6 +29,7 @@ public class FileLoader {
 		LoadAllMods();
 		FindDescriptors();
 		MoveDescriptors();
+		RenameArchivePath();
 	}
 	
 	
@@ -111,6 +114,45 @@ public class FileLoader {
 		
 		
 		
+	}
+	
+	private void RenameArchivePath() {
+		
+		for(File file : MovedDescriptors) {
+			
+			ReadFile(file);
+			
+		}
+		
+	}
+	
+	private void ReadFile(File file) {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			
+			String line;
+			
+			line = reader.readLine();
+			
+			while(line != null) {
+				
+				System.out.println(line);
+				
+				if(line.regionMatches(true, 0, "archive", 0, 7)) {
+					
+					String[] lineSplit = line.split("=");
+					String[] pathSplit = lineSplit[1].split("\"");
+					String path = pathSplit[1];
+					path.replaceAll(".*", file.getName());
+					
+					
+				}
+				line = reader.readLine();
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 }
