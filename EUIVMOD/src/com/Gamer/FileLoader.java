@@ -137,7 +137,8 @@ public class FileLoader {
 				
 				if(line.regionMatches(true, 0, "archive", 0, 7)) {
 					
-					String path = file.getName();
+					String pathU = file.getName();
+					String path = pathU.replace(".mod", ".zip");
 					line = "archive=" + "\"" + path + "\"";
 					
 					
@@ -153,9 +154,11 @@ public class FileLoader {
 			FileOutputStream output = new FileOutputStream(finalPath);
 			output.write(inputBuffer.toString().getBytes());
 			output.close();
+			reader.close();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+			
 		}
 	}
 	
