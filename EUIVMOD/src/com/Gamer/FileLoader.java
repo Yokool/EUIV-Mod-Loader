@@ -2,7 +2,6 @@ package com.Gamer;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.util.ArrayList;
 
@@ -21,7 +20,7 @@ public class FileLoader {
 	
 	private ArrayList<File> Descriptors = new ArrayList<File>();
 	
-	private ArrayList<File> MovedDescriptors = new ArrayList<File>();
+	private ArrayList<Descriptor> MovedDescriptors = new ArrayList<Descriptor>();
 	
 	// Contructor, Param used to init the path to Documents
 	public FileLoader(File pathToModFolder) {
@@ -108,7 +107,9 @@ public class FileLoader {
 		File movedDescriptor = new File(pathToModFolder.getPath() + "\\" + newName + ".mod");
 		
 		if(file.renameTo(movedDescriptor)) {
-			MovedDescriptors.add(movedDescriptor);
+			
+			MovedDescriptors.add(new Descriptor(movedDescriptor, null));
+			
 		}else {
 			System.out.println("Failed to move " + file);
 		}
@@ -119,47 +120,74 @@ public class FileLoader {
 	
 	private void RenameArchivePath() {
 		
-		for(File file : MovedDescriptors) {
-			
-			ReadFile(file);
+		for(Descriptor descriptor : MovedDescriptors) {
+
+			ReadFile(descriptor);
 			
 		}
 		
 	}
 	
-	private void ReadFile(File file) {
+	private void ReadFile(Descriptor file) {
+		String[] lineSplit = null;
+		String Name = null;
+		
+		
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(file));
-			StringBuffer inputBuffer = new StringBuffer();
+			BufferedReader reader = new BufferedReader(new FileReader(file.descriptor));
+			
 			String line;
 			
 			while ( (line = reader.readLine() ) != null) {
 				
 				if(line.regionMatches(true, 0, "archive", 0, 7)) {
 					
-					String pathU = file.getName();
-					String path = pathU.replace(".mod", ".zip");
-					line = "archive=" + "\"" + path + "\"";
+					lineSplit = line.split("\"");
+					
+					Name = lineSplit[1].replace("mod/", "");
 					
 					
 					
 				}
 				
-				inputBuffer.append(line);
-				inputBuffer.append("\n");
+				
 			}
 			
-			String finalPath = file.getPath();
-			
-			FileOutputStream output = new FileOutputStream(finalPath);
-			output.write(inputBuffer.toString().getBytes());
-			output.close();
+
 			reader.close();
+			
+			
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 			
+		}finally {
+			File move = new File(pathToModFolder.getPath() + "\\" + Name + ".mod");
+			System.out.println(move);
+			file.descriptor.renameTo(move);
+			
 		}
+		
+		
+	}
+	
+	
+	
+	
+}
+
+
+
+class Descriptor{
+	
+	public File zipMod = null;
+	public File descriptor = null;
+	
+	public Descriptor(File desc, File zip) {
+		
+		this.descriptor = desc;
+		this.zipMod = zip;
+		
 	}
 	
 }
