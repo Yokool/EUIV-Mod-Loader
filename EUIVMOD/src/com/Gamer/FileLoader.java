@@ -3,7 +3,13 @@ package com.Gamer;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class FileLoader {
 	
@@ -18,7 +24,7 @@ public class FileLoader {
 	// Strings holding all the names of the mod files
 	private String[] ModNames;
 	
-	private ArrayList<File> Descriptors = new ArrayList<File>();
+	private ArrayList<Descriptor> Descriptors = new ArrayList<Descriptor>();
 	
 	private ArrayList<Descriptor> MovedDescriptors = new ArrayList<Descriptor>();
 	
@@ -70,7 +76,7 @@ public class FileLoader {
 				for(File tempFile : tempFiles) {
 					
 					if(tempFile.getName().equals("descriptor.mod")) {
-						Descriptors.add(tempFile);
+						Descriptors.add(new Descriptor(tempFile, mod));
 						
 					}
 					
@@ -88,9 +94,9 @@ public class FileLoader {
 	// Moves all descriptors from their directory to pathToModFolder directory
 	private void MoveDescriptors(){
 		
-		for(File descriptor : Descriptors) {
+		for(Descriptor descriptor : Descriptors) {
 			
-			MoveFile(descriptor);
+			MoveFile(descriptor.descriptor, descriptor.zipMod);
 			
 		}
 		
@@ -102,16 +108,16 @@ public class FileLoader {
 	// - Rename the moved file to the name of the file the descriptor was located in (most of the time this will be the name of the mod)
 	// - Add the moved file to the MovedDescriptors array list if the moving succeeds
 	// - Output a message to the console if the moving fails
-	private void MoveFile(File file) {
-		String newName = file.getParentFile().getName();
+	private void MoveFile(File descriptor, File modArchive) {
+		String newName = descriptor.getParentFile().getName();
 		File movedDescriptor = new File(pathToModFolder.getPath() + "\\" + newName + ".mod");
 		
-		if(file.renameTo(movedDescriptor)) {
+		if(descriptor.renameTo(movedDescriptor)) {
 			
-			MovedDescriptors.add(new Descriptor(movedDescriptor, null));
+			MovedDescriptors.add(new Descriptor(movedDescriptor, modArchive));
 			
 		}else {
-			System.out.println("Failed to move " + file);
+			System.out.println("Failed to move " + descriptor);
 		}
 		
 		
@@ -132,7 +138,6 @@ public class FileLoader {
 		String[] lineSplit = null;
 		String Name = null;
 		
-		
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(file.descriptor));
 			
@@ -145,7 +150,7 @@ public class FileLoader {
 					lineSplit = line.split("\"");
 					
 					Name = lineSplit[1].replace("mod/", "");
-					
+					Name = Name.replace(".zip", "");
 					
 					
 				}
@@ -163,8 +168,11 @@ public class FileLoader {
 			
 		}finally {
 			File move = new File(pathToModFolder.getPath() + "\\" + Name + ".mod");
-			System.out.println(move);
+			
 			file.descriptor.renameTo(move);
+			
+			System.out.println(file.zipMod);
+			ZipFile(file.zipMod, Name);
 			
 		}
 		
@@ -172,7 +180,38 @@ public class FileLoader {
 	}
 	
 	
+	public void ZipFile(File file, String file_name) {
+		
+		try {
+			
+			pack(file.toString(), file.getParentFile().getPath() + "\\" + file_name + ".zip");
+			
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
+		
+	}
 	
+	// Totally not stolen from stack overflow
+	public static void pack(String sourceDirPath, String zipFilePath) throws IOException {
+	    Path p = Files.createFile(Paths.get(zipFilePath));
+	    try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(p))) {
+	        Path pp = Paths.get(sourceDirPath);
+	        Files.walk(pp)
+	          .filter(path -> !Files.isDirectory(path))
+	          .forEach(path -> {
+	              ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+	              try {
+	                  zs.putNextEntry(zipEntry);
+	                  Files.copy(path, zs);
+	                  zs.closeEntry();
+	            } catch (IOException e) {
+	                System.err.println(e);
+	            }
+	          });
+	    }
+	}
 	
 }
 
